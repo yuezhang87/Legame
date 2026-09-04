@@ -17,7 +17,7 @@ export default async function GamePage({
     redirect("/login");
   }
 
-  const game = getGame(params.slug);
+  const game = await getGame(params.slug);
   if (!game) {
     notFound();
   }

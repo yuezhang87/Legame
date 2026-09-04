@@ -1,21 +1,32 @@
+import { createClient } from "@/lib/supabase/server";
+
 export type Game = {
+  id: string;
   slug: string;
   title: string;
   description: string;
   url: string;
 };
 
-// Add a new game by adding an entry here — the dashboard grid and the
-// embed page both read from this list, nothing else needs to change.
-export const games: Game[] = [
-  {
-    slug: "words-words-words",
-    title: "Words Words Words",
-    description: "A word game.",
-    url: "https://wordswordswords-kappa.vercel.app/",
-  },
-];
+// Games now live in the `games` table so teachers can publish them from the
+// site itself. See app/games/new/actions.ts for how a row gets added.
+export async function getGames(): Promise<Game[]> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("games")
+    .select("id, slug, title, description, url")
+    .order("created_at", { ascending: true });
 
-export function getGame(slug: string): Game | undefined {
-  return games.find((g) => g.slug === slug);
+  return data ?? [];
+}
+
+export async function getGame(slug: string): Promise<Game | null> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("games")
+    .select("id, slug, title, description, url")
+    .eq("slug", slug)
+    .maybeSingle();
+
+  return data;
 }
